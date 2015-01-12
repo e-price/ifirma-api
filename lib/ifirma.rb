@@ -25,10 +25,19 @@ class Ifirma
     end
   end
 
-  def create_invoice(attrs)
+  def create_invoice(attrs, proforma = false)
     invoice_json = normalize_attributes_for_request(attrs)
-    response = post("/iapi/fakturakraj.json", invoice_json)
+    if proforma
+      response = post("/iapi/fakturaproformakraj.json", invoice_json)
+    else
+      response = post("/iapi/fakturakraj.json", invoice_json)
+    end
+
     Response.new(response.body["response"])
+  end
+
+  def create_invoice_proforma(attrs)
+    create_invoice(attrs, true)
   end
 
   def get_invoice(invoice_id, type = 'pdf')
@@ -73,6 +82,9 @@ class Ifirma
     :customer_id      => "IdentyfikatorKontrahenta",
     :customer_eu_preffix => "PrefiksUEKontrahenta",
     :customer_nip     => "NIPKontrahenta",
+    :issue_address    => "MiejsceWystawienia",
+    :invoice_type     => "TypFakturyKrajowej",
+    :order_number     => "NumerZamowienia",
     :customer         => {
       :id       => 'Identyfikator',
       :customer => "Kontrahent",
@@ -113,6 +125,11 @@ class Ifirma
     :type => {
       :net   => "NET",
       :gross => "BRT"
+    },
+    :invoice_type => {
+      :country    => "SPRZ",
+      :building   => "BUD",
+      :imprest    => "ZAL"
     },
     :payment_type => {
       :wire        => "PRZ",
