@@ -40,11 +40,23 @@ class Ifirma
     create_invoice(attrs, true)
   end
 
-  def get_invoice(invoice_id, type = 'pdf')
-    json_invoice = get("/iapi/fakturakraj/#{invoice_id}.json")
+  def get_invoice_proforma(invoice_id, type = 'pdf')
+    get_invoice(invoice_id, type = 'pdf', true)
+  end
+
+  def get_invoice(invoice_id, type = 'pdf', proforma = false)
+    if proforma
+      json_invoice = get("/iapi/fakturaproformakraj/#{invoice_id}.json")
+    else
+      json_invoice = get("/iapi/fakturakraj/#{invoice_id}.json")
+    end
     response = Response.new(json_invoice.body["response"])
     if response.success?
-      response = get("/iapi/fakturakraj/#{invoice_id}.#{type}")
+      if proforma
+        response = get("/iapi/fakturaproformakraj/#{invoice_id}.#{type}")
+      else
+        response = get("/iapi/fakturakraj/#{invoice_id}.#{type}")
+      end
       response = Response.new(response.body)
     end
     response
