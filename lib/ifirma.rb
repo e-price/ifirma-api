@@ -86,6 +86,7 @@ class Ifirma
     :type             => "LiczOd",
     :account_no       => "NumerKontaBankowego",
     :issue_date       => "DataWystawienia",
+    :payment_receive_date => "DataOtrzymaniaZaplaty",
     :issue_city       => "MiejsceWystawienia",
     :sale_date        => "DataSprzedazy",
     :sale_date_format => "FormatDatySprzedazy",
