@@ -25,12 +25,16 @@ class Ifirma
     end
   end
 
-  def create_invoice(attrs, proforma = false)
+  def create_invoice(attrs, proforma = false, cod  = false)
     invoice_json = normalize_attributes_for_request(attrs)
-    if proforma
+    if proforma && !cod
       response = post("/iapi/fakturaproformakraj.json", invoice_json)
-    else
+    elsif !proforma && !cod
       response = post("/iapi/fakturakraj.json", invoice_json)
+    elsif proforma && cod
+      response = post("/iapi/fakturaproformawysylka.json", invoice_json)
+    elsif !proforma && cod
+      response = post("/iapi/fakturawysylka.json", invoice_json)
     end
 
     Response.new(response.body["response"])
@@ -44,17 +48,21 @@ class Ifirma
     get_invoice(invoice_id, type = 'pdf', true)
   end
 
-  def get_invoice(invoice_id, type = 'pdf', proforma = false)
-    if proforma
+  def get_invoice(invoice_id, type = 'pdf', proforma = false, cod  = false)
+    if proforma && !cod
       json_invoice = get("/iapi/fakturaproformakraj/#{invoice_id}.json")
-    else
+    elsif !proforma && !cod
       json_invoice = get("/iapi/fakturakraj/#{invoice_id}.json")
+    elsif proforma && cod
+      json_invoice = get("/iapi/fakturaproformawysylka/#{invoice_id}.json")
+    elsif !proforma && cod
+      json_invoice = get("/iapi/fakturawysylka/#{invoice_id}.json")
     end
     response = Response.new(json_invoice.body["response"])
     if response.success?
-      if proforma
+      if proforma  && !cod
         response = get("/iapi/fakturaproformakraj/#{invoice_id}.#{type}")
-      else
+      elsif !proforma && !cod
         response = get("/iapi/fakturakraj/#{invoice_id}.#{type}")
       end
       response = Response.new(response.body)
