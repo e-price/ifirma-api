@@ -25,44 +25,45 @@ class Ifirma
     end
   end
 
-  def create_invoice(attrs, proforma = false, cod  = false)
+  def create_invoice(attrs, proforma = false)
     invoice_json = normalize_attributes_for_request(attrs)
-    if proforma && !cod
+    if proforma
       response = post("/iapi/fakturaproformakraj.json", invoice_json)
-    elsif !proforma && !cod
+    else
       response = post("/iapi/fakturakraj.json", invoice_json)
-    elsif proforma && cod
-      response = post("/iapi/fakturaproformawysylka.json", invoice_json)
-    elsif !proforma && cod
-      response = post("/iapi/fakturawysylka.json", invoice_json)
     end
 
     Response.new(response.body["response"])
   end
 
-  def create_invoice_proforma(attrs, cod)
-    create_invoice(attrs, true, cod)
+  def create_invoice_cod(attrs, proforma = false)
+    invoice_json = normalize_attributes_for_request(attrs, {}, attributes_map_cod)
+    if proforma
+      response = post("/iapi/fakturaproformawysylka.json", invoice_json)
+    else
+      response = post("/iapi/fakturawysylka.json", invoice_json)
+    end
   end
 
-  def get_invoice_proforma(invoice_id, type = 'pdf')
-    get_invoice(invoice_id, type = 'pdf', true)
+  def create_invoice_proforma(attrs, cod = false)
+    cod ? create_invoice_cod(attrs, true) : create_invoice(attrs, true)
   end
 
-  def get_invoice(invoice_id, type = 'pdf', proforma = false, cod  = false)
-    if proforma && !cod
+  def get_invoice_proforma(invoice_id, type = 'pdf', cod = false)
+    cod ? get_invoice_cod(invoice_id, type = 'pdf', true) : get_invoice(invoice_id, type = 'pdf', true)
+  end
+
+  def get_invoice(invoice_id, type = 'pdf', proforma = false)
+    if proforma
       json_invoice = get("/iapi/fakturaproformakraj/#{invoice_id}.json")
-    elsif !proforma && !cod
+    else
       json_invoice = get("/iapi/fakturakraj/#{invoice_id}.json")
-    elsif proforma && cod
-      json_invoice = get("/iapi/fakturaproformawysylka/#{invoice_id}.json")
-    elsif !proforma && cod
-      json_invoice = get("/iapi/fakturawysylka/#{invoice_id}.json")
     end
     response = Response.new(json_invoice.body["response"])
     if response.success?
-      if proforma  && !cod
+      if proforma
         response = get("/iapi/fakturaproformakraj/#{invoice_id}.#{type}")
-      elsif !proforma && !cod
+      else
         response = get("/iapi/fakturakraj/#{invoice_id}.#{type}")
       end
       response = Response.new(response.body)
@@ -70,14 +71,48 @@ class Ifirma
     response
   end
 
-  def get_invoices
-    json_invoice = get("/iapi/fakturakraj/list.json?limit=10")
+  def get_invoice_cod(invoice_id, type = 'pdf', proforma = false)
+    if proforma
+      json_invoice = get("/iapi/fakturaproformawysylka/#{invoice_id}.json")
+    else
+      json_invoice = get("/iapi/fakturawysylka/#{invoice_id}.json")
+    end
     response = Response.new(json_invoice.body["response"])
+    if response.success?
+      if proforma
+        response = get("/iapi/fakturaproformawysylka/#{invoice_id}.#{type}")
+      else
+        response = get("/iapi/fakturawysylka/#{invoice_id}.#{type}")
+      end
+      response = Response.new(response.body)
+    end
+    response
+  end
+
+  def get_invoices
+    json_invoice = get('/iapi/fakturakraj/list.json?limit=10')
+    response = Response.new(json_invoice.body['response'])
     # if response.success?
     #   response = get("/iapi/fakturakraj/#{invoice_id}.#{type}")
     #   response = Response.new(response.body)
     # end
     response
+  end
+
+  def get_invoices_cod
+    json_invoice = get('/iapi/fakturawysylka/list.json?limit=10')
+    response = Response.new(json_invoice.body['response'])
+    response
+  end
+
+  def attributes_map_cod
+    attributes = ATTRIBUTES_MAP
+    attributes.keys.each do |k|
+      next unless k == :paid_on_document
+      attributes.delete(k)
+      attributes[:payment_receive_date] = 'DataOtrzymaniaZaplaty'
+    end
+    attributes
   end
 
   ATTRIBUTES_MAP = {
