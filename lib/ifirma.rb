@@ -40,8 +40,8 @@ class Ifirma
     Response.new(response.body["response"])
   end
 
-  def create_invoice_proforma(attrs)
-    create_invoice(attrs, true)
+  def create_invoice_proforma(attrs, cod)
+    create_invoice(attrs, true, cod)
   end
 
   def get_invoice_proforma(invoice_id, type = 'pdf')
