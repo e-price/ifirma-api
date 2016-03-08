@@ -108,7 +108,7 @@ class Ifirma
   def invoice_attributes_map_cod
     attributes = ATTRIBUTES_MAP
     attributes.keys.each do |k|
-      next unless k == :paid_on_document
+      next unless k == :paid_on_document || k == :payment_type
       attributes.delete(k)
       attributes[:payment_receive_date] = 'DataOtrzymaniaZaplaty'
     end
@@ -132,7 +132,6 @@ class Ifirma
     :type             => "LiczOd",
     :account_no       => "NumerKontaBankowego",
     :issue_date       => "DataWystawienia",
-    :payment_receive_date => "DataOtrzymaniaZaplaty",
     :issue_city       => "MiejsceWystawienia",
     :sale_date        => "DataSprzedazy",
     :sale_date_format => "FormatDatySprzedazy",
