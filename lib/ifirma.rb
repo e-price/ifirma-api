@@ -37,12 +37,12 @@ class Ifirma
   end
 
   def create_invoice_cod(attrs, proforma = false)
-    invoice_json = normalize_attributes_for_request(attrs, {}, attributes_map_cod)
     if proforma
       response = post("/iapi/fakturaproformawysylka.json", invoice_json)
     else
       response = post("/iapi/fakturawysylka.json", invoice_json)
     end
+    invoice_json = normalize_attributes_for_request(attrs, {}, invoice_attributes_map_cod)
   end
 
   def create_invoice_proforma(attrs, cod = false)
@@ -105,7 +105,7 @@ class Ifirma
     response
   end
 
-  def attributes_map_cod
+  def invoice_attributes_map_cod
     attributes = ATTRIBUTES_MAP
     attributes.keys.each do |k|
       next unless k == :paid_on_document
