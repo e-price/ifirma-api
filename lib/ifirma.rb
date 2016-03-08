@@ -26,7 +26,7 @@ class Ifirma
   end
 
   def create_invoice(attrs, proforma = false)
-    invoice_json = normalize_attributes_for_request(attrs)
+    invoice_json = normalize_attributes_for_request(attrs, {}, invoice_attributes_map)
     if proforma
       response = post("/iapi/fakturaproformakraj.json", invoice_json)
     else
@@ -111,6 +111,17 @@ class Ifirma
       next unless k == :paid_on_document
       attributes.delete(k)
       attributes[:payment_receive_date] = 'DataOtrzymaniaZaplaty'
+    end
+    attributes
+  end
+
+  def invoice_attributes_map
+    attributes = ATTRIBUTES_MAP
+    attributes.keys.each do |k|
+      next unless k == :payment_receive_date
+      attributes.delete(k)
+      attributes[:paid_on_document] = 'ZaplaconoNaDokumencie'
+      attributes[:payment_type] = 'SposobZaplaty'
     end
     attributes
   end
