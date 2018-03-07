@@ -26,7 +26,7 @@ class Ifirma
   end
 
   def create_invoice(attrs, proforma = false)
-    invoice_json = normalize_attributes_for_request(attrs, {}, invoice_attributes_map)
+    invoice_json = build_invoice_json(attrs)
     if proforma
       response = post("/iapi/fakturaproformakraj.json", invoice_json)
     else
@@ -36,8 +36,16 @@ class Ifirma
     Response.new(response.body["response"])
   end
 
+  def build_invoice_json(attrs)
+    normalize_attributes_for_request(attrs, {}, invoice_attributes_map)
+  end
+
+  def build_cod_invoice_json(attrs)
+    normalize_attributes_for_request(attrs, {}, invoice_attributes_map_cod)
+  end
+
   def create_invoice_cod(attrs, proforma = false)
-    invoice_json = normalize_attributes_for_request(attrs, {}, invoice_attributes_map_cod)
+    invoice_json = build_cod_invoice_json(attrs)
     return if proforma
     response = post("/iapi/fakturawysylka.json", invoice_json)
   end
